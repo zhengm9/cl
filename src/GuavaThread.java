@@ -13,7 +13,7 @@ import java.util.concurrent.Executors;
 public class GuavaThread {
     private static final int THREAD_NUM = 10;
     private volatile boolean threadIsSuc = false;
-    private Object lock = new Object();
+    private int[] lock = new int[0];
 
     @Test
     public void test() {
@@ -36,6 +36,8 @@ public class GuavaThread {
                 synchronized (lock) {
                     threadIsSuc = true;
                     System.out.println("future success! int:" + integer);
+                    lock = new int[2];
+
                 }
             }
 
@@ -43,7 +45,7 @@ public class GuavaThread {
 
             }
         });
-//        ListeningExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
+
         while (!threadIsSuc) {
 
             try {
@@ -54,6 +56,9 @@ public class GuavaThread {
             synchronized (lock) {
                 if (!threadIsSuc) {
                     System.out.println("i'm waiting...");
+                }else{
+                    System.out.println("no longer wait...");
+
                 }
             }
 
