@@ -4,7 +4,9 @@ import com.google.common.collect.ObjectArrays;
 import com.google.common.util.concurrent.*;
 import org.junit.Test;
 
+import java.nio.channels.Pipe;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
 /**
@@ -16,13 +18,14 @@ public class GuavaThread {
     private int[] lock = new int[0];
 
     @Test
-    public void test() {
+    public void test() throws ExecutionException, InterruptedException {
 
         ListeningExecutorService listeningExecutorService = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(THREAD_NUM));
         ListenableFuture<Integer> future = listeningExecutorService.submit(new Callable<Integer>() {
             public Integer call() throws Exception {
                 try {
-                    Thread.sleep(10000);
+                    Thread.sleep(5000);
+                    throw new Exception("unable to finish task!", new Throwable());
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -42,7 +45,8 @@ public class GuavaThread {
             }
 
             public void onFailure(Throwable throwable) {
-
+                System.out.println("why onFailure?"+throwable.getMessage());
+                System.out.println("why onFailure?"+throwable.getCause());
             }
         });
 
@@ -55,7 +59,7 @@ public class GuavaThread {
             }
             synchronized (lock) {
                 if (!threadIsSuc) {
-                    System.out.println("i'm waiting...");
+                    System.out.println("I have waited for 1 more second...");
                 }else{
                     System.out.println("no longer wait...");
 
@@ -63,5 +67,10 @@ public class GuavaThread {
             }
 
         }
+//        System.out.println("future.get():"+future.get());
+        while (true){
+            if(future.isDone())break;
+        }
+        System.out.println("all finished.");
     }
 }
